@@ -1,4 +1,6 @@
-import jax
+import random as rd
+from tqdm import tqdm
+
 import optax
 import ml_collections
 import equinox as eqx
@@ -8,15 +10,16 @@ from jax import numpy as jnp
 from src.shape_dataset import get_3dshapes_dataset 
 from src.utils import mse, sfa_e, save_image
 
-from tqdm import tqdm
+
 
 
 @eqx.filter_jit
 def loss(model, x, key):
     recon_x, distinfo = model(x, key)
     rec_loss = mse(recon_x, x).mean()
-    sfa_loss = sfa_e(jnp.concatenate([distinfo["mean"][-1:], distinfo["mean"][:-1]], axis=0), distinfo["mean"]).sum()
-    return rec_loss + sfa_loss
+    sfa_loss = sfa_e(jnp.concatenate([distinfo["mean"][-1:], distinfo["mean"][:-1]], axis=0), distinfo["mean"]).mean()
+    loss = rec_loss + sfa_loss
+    return loss
 
 
 @eqx.filter_jit
@@ -31,13 +34,14 @@ def train_step(model, optim, opt_state, x, key):
 def eval_f(model, x, key, z_key, number_of_samples=64):
     recon_x, distinfo = model(x, key)
     rec_loss = mse(recon_x, x).mean()
-    sfa_loss = sfa_e(jnp.concatenate([distinfo["mean"][-1:], distinfo["mean"][:-1]], axis=0), distinfo["mean"]).sum()
+    sfa_loss = sfa_e(jnp.concatenate([distinfo["mean"][-1:], distinfo["mean"][:-1]], axis=0), distinfo["mean"]).mean()
+    loss = rec_loss + sfa_loss
     comparison = jnp.concatenate([x[:8], recon_x[:8]])
     sampled_from_normal_prior = model.generate(
         random.normal(z_key, (number_of_samples, model.latent_dim), dtype=model.cdtype)
     )
     return (
-        {"loss": rec_loss + sfa_loss, "rec_loss": rec_loss, "sfa_loss": sfa_loss},
+        {"loss": loss, "rec_loss": rec_loss, "sfa_loss": sfa_loss},
         comparison,
         sampled_from_normal_prior,
     )
@@ -54,7 +58,8 @@ def train_and_evaluate(config: ml_collections.ConfigDict):
 
     for epoch in range(config.num_epochs):
         for i in tqdm(range(steps_per_epoch)):
-            batch = (train_ds[config.batch_size*i:config.batch_size*(i+1)]).astype(config.cdtype) / 255.
+            random_indices = rd.sample(range(len(train_ds)), k=config.batch_size)
+            batch = (train_ds[jnp.array(random_indices)]).astype(config.cdtype) / 255.
             main_key, sampling_key = random.split(main_key, num=2)
             model, opt_state, _ = train_step(model, optim, opt_state, batch, sampling_key)
         
@@ -75,9 +80,9 @@ if __name__ == '__main__':
     config = ml_collections.ConfigDict()
     config.seed = 0
     config.num_epochs = 100
-    config.batch_size = 64
-    config.learning_rate = 3e-4
-    config.latent_dim = 64
+    config.batch_size = 1024
+    config.learning_rate = 1e-3
+    config.latent_dim = 32
     config.debug_outer = True
     config.channel_depth = 32
     config.channel_multipliers = (1, 2, 3, 4, 4)
