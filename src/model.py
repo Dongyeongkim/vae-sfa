@@ -77,7 +77,7 @@ class VAE(eqx.Module):
         stoch, distinfo = self.dist(enc_x, key)
         recon_x = self.dec(stoch)
         return recon_x, distinfo
-    
+
     @eqx.filter_jit
     def generate(self, z):
         return self.dec(z)
@@ -131,7 +131,6 @@ class ImageEncoder(eqx.Module):
         pdtype="float32",
         cdtype="float32",
     ):
-
         channels = (3 if use_rgb else 1,) + tuple(
             [channel_depth * mult for mult in channel_multipliers]
         )
@@ -195,7 +194,7 @@ class ImageDecoder(eqx.Module):
         self._linear_proj = Linear(
             param_key,
             in_features=latent_dim,
-            out_features=(minres**2)*channels[-1],
+            out_features=(minres**2) * channels[-1],
             act=act,
             norm=norm,
             pdtype=pdtype,

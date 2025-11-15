@@ -6,34 +6,44 @@ from PIL import Image
 
 # input normalisation
 
+
 def symlog(x):
     return jnp.sign(x) * jnp.log(jnp.abs(x) + 1)
+
 
 def symexp(x):
     return jnp.sign(x) * (jnp.exp(jnp.abs(x)) - 1)
 
+
 # loss functions
+
 
 @jax.vmap
 def kl_divergence(mean, logvar):
     return -0.5 * jnp.sum(1 + logvar - jnp.square(mean) - jnp.exp(logvar))
 
+
 @jax.vmap
 def sfa_e(mean_src, mean_target):
-    return 0.5 * jnp.sum((mean_src-jax.lax.stop_gradient(mean_target))**2)
+    return 0.5 * jnp.sum((mean_src - jax.lax.stop_gradient(mean_target)) ** 2)
+
 
 @jax.vmap
 def mse(recon, obs):
-    return jnp.sum((recon-obs)**2)
+    return jnp.sum((recon - obs) ** 2)
 
 
 # computing util(precision casting)
 
+
 def cast_to_compute(values, compute_dtype):
-    return jax.tree_util.tree_map(lambda x: x if x.dtype == compute_dtype else x.astype(compute_dtype), values)
+    return jax.tree_util.tree_map(
+        lambda x: x if x.dtype == compute_dtype else x.astype(compute_dtype), values
+    )
 
 
 # visualising util
+
 
 def save_image(ndarray, fp, nrow=8, padding=2, pad_value=0.0, format_img=None):
     """Make a grid of images and Save it into an image file.
@@ -57,7 +67,7 @@ def save_image(ndarray, fp, nrow=8, padding=2, pad_value=0.0, format_img=None):
             and all(isinstance(t, jnp.ndarray) for t in ndarray)
         )
     ):
-        raise TypeError(f'array_like of tensors expected, got {type(ndarray)}')
+        raise TypeError(f"array_like of tensors expected, got {type(ndarray)}")
 
     ndarray = jnp.asarray(ndarray)
 

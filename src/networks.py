@@ -44,19 +44,19 @@ class Conv2D(eqx.Module):
         self.pdtype = pdtype
         self.cdtype = cdtype
         assert isinstance(in_channels, int), "in channels should be the type of integer"
-        assert isinstance(
-            out_channels, int
-        ), "out channels should be the type of integer"
+        assert isinstance(out_channels, int), (
+            "out channels should be the type of integer"
+        )
         assert isinstance(kernel_size, int), "kernel_size should be the type of integer"
         assert isinstance(stride, int), "stride should be the type of integer"
         assert isinstance(groups, int), "groups should be the type of integer"
         assert groups > 0, "Number of Groups muste be a positive integer"
-        assert (
-            in_channels % groups == 0
-        ), "Number of in channels must be divisible by Number of Groups"
-        assert not (
-            transpose and (groups > 1)
-        ), "In ConvTranspose the Number of Groups must be 1"
+        assert in_channels % groups == 0, (
+            "Number of in channels must be divisible by Number of Groups"
+        )
+        assert not (transpose and (groups > 1)), (
+            "In ConvTranspose the Number of Groups must be 1"
+        )
         wkey, bkey = jax.random.split(key, num=2)
         self.stride = stride
         self.num_groups = groups
@@ -142,12 +142,12 @@ class Linear(eqx.Module):
         self.act = act
         self.pdtype = pdtype
         self.cdtype = cdtype
-        assert isinstance(
-            in_features, int
-        ), "num_features should be the type of integer"
-        assert isinstance(
-            out_features, int
-        ), "out_features should be the type of integer"
+        assert isinstance(in_features, int), (
+            "num_features should be the type of integer"
+        )
+        assert isinstance(out_features, int), (
+            "out_features should be the type of integer"
+        )
         assert isinstance(fanin, int), "fanin should be the type of integer"
 
         wkey, bkey = jax.random.split(key, num=2)
@@ -221,15 +221,15 @@ class BlockLinear(eqx.Module):
         assert isinstance(in_features, int), "The type of in_features should be int"
         assert isinstance(out_features, int), "The type of out_features should be int"
         assert isinstance(num_groups, int), "The type of num_groups should be int"
-        assert (
-            num_groups <= out_features
-        ), "The type of num_groups cannot be larger than out_features"
-        assert (
-            in_features % num_groups == 0
-        ), "The number of in_features should be the multiplier of number of groups"
-        assert (
-            out_features % num_groups == 0
-        ), "The number of out_features should be the multiplier of number of groups"
+        assert num_groups <= out_features, (
+            "The type of num_groups cannot be larger than out_features"
+        )
+        assert in_features % num_groups == 0, (
+            "The number of in_features should be the multiplier of number of groups"
+        )
+        assert out_features % num_groups == 0, (
+            "The number of out_features should be the multiplier of number of groups"
+        )
 
         self.in_features = in_features
         self.out_features = out_features
@@ -297,9 +297,7 @@ class Norm(eqx.Module):
     _impl: str
     _eps: float
     act: str = "none"
-    pdtype: str = (
-        "float32"  # JUST FOR PLACEHOLDER; IT ALWAYS SHOULD BE PRECISER OR EQUAL THAN FLOAT32(PRECISION ISSUE)
-    )
+    pdtype: str = "float32"  # JUST FOR PLACEHOLDER; IT ALWAYS SHOULD BE PRECISER OR EQUAL THAN FLOAT32(PRECISION ISSUE)
     cdtype: str = "float32"
 
     def __init__(
@@ -315,9 +313,9 @@ class Norm(eqx.Module):
         self._eps = eps
         self.act = act
         self.cdtype = cdtype
-        assert isinstance(
-            num_features, int
-        ), "num_features should be the type of integer"
+        assert isinstance(num_features, int), (
+            "num_features should be the type of integer"
+        )
         self.scale = jnp.ones(
             (num_features,), dtype="float32"
         )  # IT ALWAYS SHOULD BE FLOAT32 (PRECISION ISSUE)
