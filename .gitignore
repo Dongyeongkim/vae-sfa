@@ -1,4 +1,12 @@
+# Logs and Results 
+
 results/*
-dataset/*
+
+# Caches
+
 __pycache__/*
 */__pycache__
+
+# Data files
+dataset/*
+*.h5

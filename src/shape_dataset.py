@@ -1,7 +1,6 @@
 import os
 import h5py
 from jax import random
-import jax.numpy as jnp
 
 
 def get_3dshapes_dataset(rng, path):
