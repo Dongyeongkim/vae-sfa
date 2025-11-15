@@ -1,3 +1,4 @@
+import os
 import jax
 import math
 import numpy as np
@@ -101,4 +102,9 @@ def save_image(ndarray, fp, nrow=8, padding=2, pad_value=0.0, format_img=None):
     # Add 0.5 after unnormalizing to [0, 255] to round to nearest integer
     ndarr = np.array(jnp.clip(grid * 255.0 + 0.5, 0, 255).astype(jnp.uint8))
     im = Image.fromarray(ndarr.copy())
-    im.save(fp, format=format_img)
+    try:
+        im.save(fp, format=format_img)
+
+    except FileNotFoundError:
+        os.makedirs(os.path.dirname(fp), exist_ok=True)
+        im.save(fp, format=format_img)
